@@ -12,21 +12,37 @@ touched by `cursor-sync`.
 
 ## Install
 
-### macOS / Linux
+Clone the repo and run the installer for your OS. No network access is
+required once the repo is cloned:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cwang0126/cursor-synchronizer/master/install.sh | bash
+git clone https://github.com/cwang0126/cursor-synchronizer.git
+cd cursor-synchronizer
+
+# macOS / Linux
+./install.sh
+
+# Windows (PowerShell)
+.\install.ps1
 ```
 
-### Windows (PowerShell)
+The installer copies the prebuilt binary from `bin/<os>_<arch>/` into
+`/usr/local/bin` (or `~/.local/bin` as a fallback) — or
+`%USERPROFILE%\.cursor-sync\bin` on Windows — and makes sure it's on your
+`PATH`.
 
-```powershell
-irm https://raw.githubusercontent.com/cwang0126/cursor-synchronizer/master/install.ps1 | iex
+### Building prebuilt binaries
+
+If your OS/architecture isn't already in `bin/`, build it first with the
+interactive helper (requires Go 1.22+):
+
+```bash
+./build.sh        # pick a target or "all"
+./install.sh      # then install
 ```
 
-Both scripts download the appropriate prebuilt binary from the latest GitHub
-Release, drop it into `/usr/local/bin` (or `~/.local/bin` as a fallback), and
-make sure it's on your `PATH`.
+`build.sh` writes to `bin/<os>_<arch>/cursor-sync[.exe]`, matching what
+`install.sh` / `install.ps1` look for.
 
 ### Build from source
 

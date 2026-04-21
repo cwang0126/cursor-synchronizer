@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-04-21
+## [v0.1.0] - 2026-04-21
 
 Initial release of `cursor-sync` — a small Go CLI that one-way syncs a
 project's `.cursor/` rules, skills, and commands from a remote git repository.
@@ -27,10 +27,13 @@ project's `.cursor/` rules, skills, and commands from a remote git repository.
 - One-way pull model: files added locally under `.cursor/` are never touched.
 - Uses the local `git` binary for `--depth 1` clones into a temp dir, so
   authentication piggybacks on your existing git credentials.
-- Prebuilt static binaries for macOS (amd64/arm64), Linux (amd64/arm64), and
-  Windows (amd64), released via GitHub Actions on `v*` tags.
-- `install.sh` (macOS/Linux) and `install.ps1` (Windows) to download the right
-  prebuilt binary and put it on `PATH`.
+- `build.sh` — interactive cross-compiler that writes binaries to
+  `bin/<os>_<arch>/cursor-sync[.exe]` for darwin/linux/windows × amd64/arm64.
+  Requires Go 1.22+.
+- `install.sh` (macOS/Linux) and `install.ps1` (Windows) — install the
+  prebuilt binary from `bin/<os>_<arch>/` onto `PATH` after a local
+  `git clone`, with no network access. Scripts error cleanly and point at
+  `./build.sh` when no matching binary is committed for the host platform.
 - Build-from-source instructions for Go 1.22+.
 
 [0.1.0]: https://github.com/cwang0126/cursor-synchronizer/releases/tag/v0.1.0

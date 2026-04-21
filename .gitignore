@@ -2,7 +2,6 @@
 /cursor-sync
 /cursor-sync.exe
 /dist/
-/bin/
 
 # OS
 .DS_Store
@@ -19,5 +18,5 @@ vendor/
 # Cursor
 .cursor/*
 
-# Project Spec
-project-spec.md
+# Project Related
+project*
