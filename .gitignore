@@ -1,0 +1,23 @@
+# Build output
+/cursor-sync
+/cursor-sync.exe
+/dist/
+/bin/
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Go
+*.test
+*.out
+vendor/
+
+# Cursor
+.cursor/*
+
+# Project Spec
+project-spec.md
