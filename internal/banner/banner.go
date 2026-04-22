@@ -5,19 +5,22 @@ import (
 	"io"
 )
 
-const cyan = "\033[36m"
-const bold = "\033[1m"
-const reset = "\033[0m"
+// Cyan is the bright cyan ANSI color used by the banner; exported so other
+// packages can color related text (e.g. tagline / version) to match.
+const Cyan = "\033[1;96m"
+const Reset = "\033[0m"
 
+// art is figlet's "slant" rendering of "Cursor Sync".
 const art = `
-   ____ _   _ ____  ____   ___  ____        ______   ___   _  ____
-  / ___| | | |  _ \/ ___| / _ \|  _ \      / ___\ \ / / \ | |/ ___|
- | |   | | | | |_) \___ \| | | | |_) |____ \___ \\ V /|  \| | |
- | |___| |_| |  _ < ___) | |_| |  _ <_____|___) || | | |\  | |___
-  \____|\___/|_| \_\____/ \___/|_| \_\    |____/ |_| |_| \_|\____|
+   ______                              _____                 
+  / ____/_  ________________  _____   / ___/__  ______  _____
+ / /   / / / / ___/ ___/ __ \/ ___/   \__ \/ / / / __ \/ ___/
+/ /___/ /_/ / /  (__  ) /_/ / /      ___/ / /_/ / / / / /__  
+\____/\__,_/_/  /____/\____/_/      /____/\__, /_/ /_/\___/  
+                                         /____/              
 `
 
 // Print writes the banner to w using ANSI colors.
 func Print(w io.Writer) {
-	fmt.Fprint(w, cyan+bold+art+reset+"\n")
+	fmt.Fprint(w, Cyan, art, Reset, "\n")
 }

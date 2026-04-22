@@ -13,12 +13,12 @@ if ! command -v go >/dev/null 2>&1; then
 fi
 
 targets=(
-  "darwin/amd64"
   "darwin/arm64"
-  "linux/amd64"
+  "darwin/amd64"
   "linux/arm64"
-  "windows/amd64"
+  "linux/amd64"
   "windows/arm64"
+  "windows/amd64"
 )
 
 echo "Select build target:"

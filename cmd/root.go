@@ -40,10 +40,16 @@ Global Flags:
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `
 
+const tagline = "cursor-sync keeps your local .cursor config in sync with a remote Git repository."
+
+// rootLong is what cobra prints at the top of the help output.
+// We color the tagline to match the banner and add a dimmed version line.
+var rootLong = banner.Cyan + tagline + banner.Reset + "\n\033[2mVersion " + version + "\033[0m"
+
 var rootCmd = &cobra.Command{
 	Use:           "cursor-sync",
 	Short:         "Sync .cursor rules/skills/commands from a remote git repo",
-	Long:          "cursor-sync keeps your local project's .cursor configuration in sync with a remote git repository.",
+	Long:          rootLong,
 	Version:       version,
 	SilenceUsage:  true,
 	SilenceErrors: true,

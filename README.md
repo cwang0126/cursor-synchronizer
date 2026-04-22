@@ -10,6 +10,10 @@ the same Cursor agent context.
 - **One-way pull only.** Files you add yourself under `.cursor/` are never
 touched by `cursor-sync`.
 
+<p align="left">
+  <img src="img/v0.1.0.png" alt="cursor-synchronizer Banner" width="600"/>
+</p>
+
 ## Install
 
 Clone the repo and run the installer for your OS. No network access is
