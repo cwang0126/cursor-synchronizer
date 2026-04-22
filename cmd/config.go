@@ -19,13 +19,14 @@ var configCmd = &cobra.Command{
 	Long: `Examples:
   cursor-sync config --show remote
   cursor-sync config --set remote https://github.com/owner/repo.git
-  cursor-sync config --set branch main`,
+  cursor-sync config --set branch main
+  cursor-sync config --set folder configs/cursor`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runConfig,
 }
 
 func init() {
-	configCmd.Flags().StringVar(&configShow, "show", "", "Show the value of a config field (e.g. remote, branch)")
+	configCmd.Flags().StringVar(&configShow, "show", "", "Show the value of a config field (e.g. remote, branch, folder)")
 	configCmd.Flags().StringVar(&configSet, "set", "", "Set a config field; pass the new value as a positional argument")
 }
 
@@ -80,8 +81,10 @@ func getField(c *config.Config, field string) (string, error) {
 		return c.Remote, nil
 	case "branch":
 		return c.Branch, nil
+	case "folder":
+		return c.Folder, nil
 	default:
-		return "", fmt.Errorf("unknown field %q (supported: remote, branch)", field)
+		return "", fmt.Errorf("unknown field %q (supported: remote, branch, folder)", field)
 	}
 }
 
@@ -91,8 +94,10 @@ func setField(c *config.Config, field, value string) error {
 		c.Remote = value
 	case "branch":
 		c.Branch = value
+	case "folder":
+		c.Folder = value
 	default:
-		return fmt.Errorf("unknown field %q (supported: remote, branch)", field)
+		return fmt.Errorf("unknown field %q (supported: remote, branch, folder)", field)
 	}
 	return nil
 }

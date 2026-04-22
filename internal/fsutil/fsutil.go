@@ -41,6 +41,25 @@ func DetectCursorRoot(repoRoot string) (string, bool) {
 	return "", false
 }
 
+// ResolveCursorRoot returns repoRoot/folder, validating that the folder
+// exists and contains at least one of {rules, skills, commands}. folder is
+// a path relative to the repo root (e.g. ".cursor" or "configs/cursor").
+//
+// Use this when the caller has an explicit folder (e.g. from --folder);
+// use DetectCursorRoot when falling back to auto-detection.
+func ResolveCursorRoot(repoRoot, folder string) (string, error) {
+	root := filepath.Join(repoRoot, folder)
+	if !Exists(root) {
+		return "", fmt.Errorf("folder %q not found in remote repo", folder)
+	}
+	for _, sub := range CursorSubdirs {
+		if Exists(filepath.Join(root, sub)) {
+			return root, nil
+		}
+	}
+	return "", fmt.Errorf("folder %q has no rules/, skills/, or commands/ subdirectory", folder)
+}
+
 // Entry is one top-level item under .cursor/<group>/, e.g. a single rule
 // file or a skill folder.
 type Entry struct {

@@ -16,6 +16,7 @@ import (
 var (
 	cloneAll    bool
 	cloneBranch string
+	cloneFolder string
 )
 
 var cloneCmd = &cobra.Command{
@@ -25,10 +26,14 @@ var cloneCmd = &cobra.Command{
 to import, copies them into <directory>/.cursor/, and writes
 <directory>/.cursor-sync/{config.yaml,manifest.yaml}.
 
-The source layout on the remote may be any of:
+By default the source layout is auto-detected on the remote, in order:
   - .cursor/{rules,skills,commands}/   (preferred)
   - cursor/{rules,skills,commands}/
   - {rules,skills,commands}/           (at the repo root)
+
+Pass --folder <path> to skip auto-detection and read from a specific folder
+relative to the repo root (e.g. --folder configs/cursor). The chosen folder
+is recorded in .cursor-sync/config.yaml and reused by later pulls.
 
 If [directory] is omitted, the current folder (.) is used.`,
 	Args: cobra.RangeArgs(1, 2),
@@ -37,7 +42,8 @@ If [directory] is omitted, the current folder (.) is used.`,
 
 func init() {
 	cloneCmd.Flags().BoolVarP(&cloneAll, "all", "a", false, "Skip the multi-select and import everything")
-	cloneCmd.Flags().StringVarP(&cloneBranch, "branch", "b", "", "Branch of the remote repo to use (default: try master, then main)")
+	cloneCmd.Flags().StringVarP(&cloneBranch, "branch", "b", "", "Branch of the remote repo to use (default: try main, then master)")
+	cloneCmd.Flags().StringVarP(&cloneFolder, "folder", "f", "", "Remote folder (relative to repo root) containing rules/skills/commands (default: auto-detect .cursor, cursor, or repo root)")
 }
 
 func runClone(cmd *cobra.Command, args []string) error {
@@ -64,9 +70,9 @@ func runClone(cmd *cobra.Command, args []string) error {
 	}
 	defer os.RemoveAll(tmp)
 
-	srcCursor, ok := fsutil.DetectCursorRoot(tmp)
-	if !ok {
-		return fmt.Errorf("remote repo has no .cursor/, cursor/, or root-level rules/skills/commands directories")
+	srcCursor, err := resolveOrDetectCursorRoot(tmp, cloneFolder)
+	if err != nil {
+		return err
 	}
 
 	entries, err := fsutil.ListCursorEntries(srcCursor)
@@ -100,6 +106,7 @@ func runClone(cmd *cobra.Command, args []string) error {
 	if err := config.Save(absTarget, &config.Config{
 		Remote: repoURL,
 		Branch: branch,
+		Folder: cloneFolder,
 	}); err != nil {
 		return err
 	}
@@ -112,7 +119,7 @@ func runClone(cmd *cobra.Command, args []string) error {
 }
 
 // cloneWithBranchFallback shallow-clones repoURL. If branch is non-empty it
-// is used as-is; otherwise we try "master" first and fall back to "main".
+// is used as-is; otherwise we try "main" first and fall back to "master".
 // Returns the temp dir path and the branch that actually succeeded.
 func cloneWithBranchFallback(repoURL, branch string) (string, string, error) {
 	if branch != "" {
@@ -124,7 +131,7 @@ func cloneWithBranchFallback(repoURL, branch string) (string, string, error) {
 		return tmp, branch, nil
 	}
 
-	candidates := []string{"master", "main"}
+	candidates := []string{"main", "master"}
 	for i, candidate := range candidates {
 		fmt.Fprintf(os.Stderr, "Cloning %s (branch %s)...\n", repoURL, candidate)
 		tmp, err := git.ShallowClone(repoURL, candidate)
@@ -135,7 +142,7 @@ func cloneWithBranchFallback(repoURL, branch string) (string, string, error) {
 			fmt.Fprintf(os.Stderr, "branch %s not found, trying %s...\n", candidate, candidates[i+1])
 		}
 	}
-	return "", "", fmt.Errorf("could not find branch master or main on remote; pass --branch <name> to use a different one")
+	return "", "", fmt.Errorf("could not find branch main or master on remote; pass --branch <name> to use a different one")
 }
 
 // looksLikeRepoURL returns true for the URL forms git itself accepts so we

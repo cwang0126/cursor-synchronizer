@@ -97,8 +97,12 @@ cursor-sync clone https://github.com/example/cursor-config.git my-project
 # Skip the prompt and import everything:
 cursor-sync clone --all https://github.com/example/cursor-config.git
 
-# Use a non-default(master/main) branch:
+# Use a non-default(main/master) branch:
 cursor-sync clone --branch dev https://github.com/example/cursor-config.git
+
+# Read the source from a custom folder on the remote (default: auto-detect
+# .cursor/, cursor/, or repo root):
+cursor-sync clone --folder configs/cursor https://github.com/example/cursor-config.git
 ```
 
 The multi-select prompt uses arrow keys to navigate, space to toggle, and
@@ -120,6 +124,10 @@ Overwrite rules/foo.mdc? [y/N/a/s]
 
 `--yes` (`-y`) overwrites everything without prompting.
 
+`--folder` (`-f`) overrides the remote source folder for this pull and
+writes the new value back into `.cursor-sync/config.yaml` so later pulls
+use it by default.
+
 ### `cursor-sync list`
 
 Lists every entry under `.cursor/` and tags each one:
@@ -135,6 +143,7 @@ This is offline; no network call is made.
 cursor-sync config --show remote
 cursor-sync config --set remote https://github.com/example/cursor-config.git
 cursor-sync config --set branch dev
+cursor-sync config --set folder configs/cursor
 ```
 
 ## How it works
@@ -154,8 +163,8 @@ temp clone. Authentication uses your existing git credentials (SSH keys,
 
 ### Supported remote layouts
 
-The remote repo's source layout can be any of the following. Detection runs
-in this order and picks the first match:
+By default the remote repo's source layout is auto-detected. Detection
+runs in this order and picks the first match:
 
 ```
 <repo>/.cursor/{rules,skills,commands}/   # preferred
@@ -163,7 +172,15 @@ in this order and picks the first match:
 <repo>/{rules,skills,commands}/           # groupings at the repo root
 ```
 
-Regardless of which layout the remote uses, files always land locally under
+If your remote keeps the groupings somewhere else, pass `--folder <path>`
+(relative to the repo root) on `clone` / `pull`, or persist it with
+`cursor-sync config --set folder <path>`. For example:
+
+```
+--folder configs/cursor   # <repo>/configs/cursor/{rules,skills,commands}/
+```
+
+Regardless of the remote layout, files always land locally under
 `<project>/.cursor/` because that's what Cursor itself reads.
 
 ## License

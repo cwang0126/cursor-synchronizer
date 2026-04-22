@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version = "0.2.0"
+const version = "0.3.0"
 
 // rootUsageTemplate is cobra's default usage template with two tweaks:
 //   - the Available Commands rows render "name|alias1|alias2" via cmdLabel
@@ -50,7 +50,7 @@ var rootCmd = &cobra.Command{
 	Use:   "cursor-sync",
 	Short: "Sync .cursor rules/skills/commands from a remote git repo",
 	Example: `  cursor-sync clone <repo-url> [directory]
-  cursor-sync clone <repo-url> --branch [branch-name]`,
+  cursor-sync clone <repo-url> --branch [branch-name] --folder [folder-path]`,
 	Version:       version,
 	SilenceUsage:  true,
 	SilenceErrors: true,

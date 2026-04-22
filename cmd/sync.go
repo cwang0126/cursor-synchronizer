@@ -9,6 +9,22 @@ import (
 	"github.com/cwang0126/cursor-synchronizer/internal/prompts"
 )
 
+// resolveOrDetectCursorRoot picks the remote source directory inside
+// repoRoot. When folder is non-empty it's used verbatim (strict) so the
+// caller can target a layout like "configs/cursor" via --folder. When
+// folder is empty we fall back to auto-detection across the standard
+// candidates (.cursor, cursor, repo root).
+func resolveOrDetectCursorRoot(repoRoot, folder string) (string, error) {
+	if folder != "" {
+		return fsutil.ResolveCursorRoot(repoRoot, folder)
+	}
+	root, ok := fsutil.DetectCursorRoot(repoRoot)
+	if !ok {
+		return "", fmt.Errorf("remote repo has no .cursor/, cursor/, or root-level rules/skills/commands directories; pass --folder <path> to point at the directory containing them")
+	}
+	return root, nil
+}
+
 // syncOptions controls how copyEntries handles overwrite conflicts.
 type syncOptions struct {
 	// assumeYes forces overwrite without prompting.

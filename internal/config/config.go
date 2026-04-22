@@ -24,6 +24,7 @@ const (
 type Config struct {
 	Remote string `yaml:"remote"`
 	Branch string `yaml:"branch"`
+	Folder string `yaml:"folder"`
 }
 
 // Manifest is the contents of .cursor-sync/manifest.yaml.

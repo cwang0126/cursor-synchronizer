@@ -12,19 +12,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var pullYes bool
+var (
+	pullYes    bool
+	pullFolder string
+)
 
 var pullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pull the latest .cursor entries previously synced into this project",
 	Long: `Re-syncs only the entries already tracked in .cursor-sync/manifest.yaml.
-On per-file conflicts the user is prompted (y/N/a/s); pass --yes to overwrite all.`,
+On per-file conflicts the user is prompted (y/N/a/s); pass --yes to overwrite all.
+
+The remote source folder defaults to the "folder" value recorded in
+.cursor-sync/config.yaml; if that is empty it's auto-detected among
+.cursor/, cursor/, or the repo root. Pass --folder to override it; the
+new value is written back into config.yaml.`,
 	Args: cobra.NoArgs,
 	RunE: runPull,
 }
 
 func init() {
 	pullCmd.Flags().BoolVarP(&pullYes, "yes", "y", false, "Overwrite all conflicting files without prompting")
+	pullCmd.Flags().StringVarP(&pullFolder, "folder", "f", "", "Remote folder (relative to repo root) containing rules/skills/commands (default: value from config.yaml, else auto-detect)")
 }
 
 func runPull(cmd *cobra.Command, args []string) error {
@@ -50,6 +59,11 @@ func runPull(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("manifest contains no recognizable entries")
 	}
 
+	folder := cfg.Folder
+	if pullFolder != "" {
+		folder = pullFolder
+	}
+
 	fmt.Fprintf(os.Stderr, "Pulling %s (branch %s)...\n", cfg.Remote, cfg.Branch)
 	tmp, err := git.ShallowClone(cfg.Remote, cfg.Branch)
 	if err != nil {
@@ -57,9 +71,16 @@ func runPull(cmd *cobra.Command, args []string) error {
 	}
 	defer os.RemoveAll(tmp)
 
-	srcCursor, ok := fsutil.DetectCursorRoot(tmp)
-	if !ok {
-		return fmt.Errorf("remote repo has no .cursor/, cursor/, or root-level rules/skills/commands directories")
+	srcCursor, err := resolveOrDetectCursorRoot(tmp, folder)
+	if err != nil {
+		return err
+	}
+
+	if folder != cfg.Folder {
+		cfg.Folder = folder
+		if err := config.Save(cwd, cfg); err != nil {
+			return err
+		}
 	}
 
 	remoteEntries, err := fsutil.ListCursorEntries(srcCursor)
