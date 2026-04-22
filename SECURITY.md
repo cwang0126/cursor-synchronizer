@@ -7,8 +7,8 @@ security updates; older lines are not patched.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < 0.1   | :x:                |
+| 0.2.x   | :white_check_mark: |
+| < 0.2   | :x:                |
 
 Once a `1.0` is released, this table will be updated to cover the current
 major line and the immediately preceding one.

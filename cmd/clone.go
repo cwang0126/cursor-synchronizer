@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cwang0126/cursor-synchronizer/internal/banner"
 	"github.com/cwang0126/cursor-synchronizer/internal/config"
 	"github.com/cwang0126/cursor-synchronizer/internal/fsutil"
 	"github.com/cwang0126/cursor-synchronizer/internal/git"
@@ -38,12 +37,10 @@ If [directory] is omitted, the current folder (.) is used.`,
 
 func init() {
 	cloneCmd.Flags().BoolVarP(&cloneAll, "all", "a", false, "Skip the multi-select and import everything")
-	cloneCmd.Flags().StringVarP(&cloneBranch, "branch", "b", "master", "Branch of the remote repo to use")
+	cloneCmd.Flags().StringVarP(&cloneBranch, "branch", "b", "", "Branch of the remote repo to use (default: try master, then main)")
 }
 
 func runClone(cmd *cobra.Command, args []string) error {
-	banner.Print(os.Stdout)
-
 	repoURL := args[0]
 	if !looksLikeRepoURL(repoURL) {
 		return fmt.Errorf("first argument must be a repo URL (got %q)", repoURL)
@@ -61,8 +58,7 @@ func runClone(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("create target dir: %w", err)
 	}
 
-	fmt.Fprintf(os.Stderr, "Cloning %s (branch %s)...\n", repoURL, cloneBranch)
-	tmp, err := git.ShallowClone(repoURL, cloneBranch)
+	tmp, branch, err := cloneWithBranchFallback(repoURL, cloneBranch)
 	if err != nil {
 		return err
 	}
@@ -103,7 +99,7 @@ func runClone(cmd *cobra.Command, args []string) error {
 
 	if err := config.Save(absTarget, &config.Config{
 		Remote: repoURL,
-		Branch: cloneBranch,
+		Branch: branch,
 	}); err != nil {
 		return err
 	}
@@ -113,6 +109,33 @@ func runClone(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintf(os.Stderr, "\nDone. Wrote %d file(s) to %s\n", len(written), dstCursor)
 	return nil
+}
+
+// cloneWithBranchFallback shallow-clones repoURL. If branch is non-empty it
+// is used as-is; otherwise we try "master" first and fall back to "main".
+// Returns the temp dir path and the branch that actually succeeded.
+func cloneWithBranchFallback(repoURL, branch string) (string, string, error) {
+	if branch != "" {
+		fmt.Fprintf(os.Stderr, "Cloning %s (branch %s)...\n", repoURL, branch)
+		tmp, err := git.ShallowClone(repoURL, branch)
+		if err != nil {
+			return "", "", err
+		}
+		return tmp, branch, nil
+	}
+
+	candidates := []string{"master", "main"}
+	for i, candidate := range candidates {
+		fmt.Fprintf(os.Stderr, "Cloning %s (branch %s)...\n", repoURL, candidate)
+		tmp, err := git.ShallowClone(repoURL, candidate)
+		if err == nil {
+			return tmp, candidate, nil
+		}
+		if i < len(candidates)-1 {
+			fmt.Fprintf(os.Stderr, "branch %s not found, trying %s...\n", candidate, candidates[i+1])
+		}
+	}
+	return "", "", fmt.Errorf("could not find branch master or main on remote; pass --branch <name> to use a different one")
 }
 
 // looksLikeRepoURL returns true for the URL forms git itself accepts so we

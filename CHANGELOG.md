@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.1.0] - 2026-04-21
+## [v0.2.0] - 2026-04-22 Auto-detection feature on default branch name
+
+### Added
+- `cursor-sync clone` now auto-detects the default branch when `--branch` is
+  omitted: it tries `master` first and falls back to `main`, returning a
+  clear error if neither exists. The resolved branch is written to
+  `.cursor-sync/config.yaml` so subsequent `cursor-sync pull` runs go
+  straight to the right ref.
+
+### Changed
+- Replace ASCII art banner style.
+- `--branch` flag default flipped from a hard-coded `master` to empty,
+  with the help text updated to `(default: try master, then main)`.
+
+## [v0.1.0] - 2026-04-21 Initial Release
 
 Initial release of `cursor-sync` — a small Go CLI that one-way syncs a
 project's `.cursor/` rules, skills, and commands from a remote git repository.
@@ -36,4 +50,5 @@ project's `.cursor/` rules, skills, and commands from a remote git repository.
   `./build.sh` when no matching binary is committed for the host platform.
 - Build-from-source instructions for Go 1.22+.
 
+[0.2.0]: https://github.com/cwang0126/cursor-synchronizer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/cwang0126/cursor-synchronizer/releases/tag/v0.1.0

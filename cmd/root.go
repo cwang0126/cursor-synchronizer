@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version = "0.1.0"
+const version = "0.2.0"
 
 // rootUsageTemplate is cobra's default usage template with two tweaks:
 //   - the Available Commands rows render "name|alias1|alias2" via cmdLabel
@@ -42,14 +42,15 @@ Use "{{.CommandPath}} [command] --help" for more information about a command.{{e
 
 const tagline = "cursor-sync keeps your local .cursor config in sync with a remote Git repository."
 
-// rootLong is what cobra prints at the top of the help output.
-// We color the tagline to match the banner and add a dimmed version line.
-var rootLong = banner.Cyan + tagline + banner.Reset + "\n\033[2mVersion " + version + "\033[0m"
+// bareHeader is printed only for the bare `cursor-sync` invocation, directly
+// below the banner. It's intentionally kept off the --help output.
+var bareHeader = banner.Cyan + tagline + banner.Reset + "\n\033[2mVersion " + version + "\033[0m"
 
 var rootCmd = &cobra.Command{
-	Use:           "cursor-sync",
-	Short:         "Sync .cursor rules/skills/commands from a remote git repo",
-	Long:          rootLong,
+	Use:   "cursor-sync",
+	Short: "Sync .cursor rules/skills/commands from a remote git repo",
+	Example: `  cursor-sync clone <repo-url> [directory]
+  cursor-sync clone <repo-url> --branch [branch-name]`,
 	Version:       version,
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -94,10 +95,11 @@ func cmdLabel(c *cobra.Command) string {
 //   - A repo-URL-looking arg: suggest the likely-intended `cursor-sync clone`.
 //   - Any other unknown arg: short error pointing at --help.
 func runRoot(cmd *cobra.Command, args []string) {
-	banner.Print(os.Stdout)
-
 	if len(args) == 0 {
-		_ = cmd.Help()
+		banner.Print(os.Stdout)
+		fmt.Fprintln(os.Stdout, bareHeader)
+		fmt.Fprintln(os.Stdout)
+		_ = cmd.Usage()
 		return
 	}
 

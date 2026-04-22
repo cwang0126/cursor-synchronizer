@@ -11,7 +11,7 @@ the same Cursor agent context.
 touched by `cursor-sync`.
 
 <p align="left">
-  <img src="img/v0.1.0.png" alt="cursor-synchronizer Banner" width="600"/>
+  <img src="img/screenshot.png" alt="cursor-synchronizer Banner" width="600"/>
 </p>
 
 ## Install
@@ -97,7 +97,7 @@ cursor-sync clone https://github.com/example/cursor-config.git my-project
 # Skip the prompt and import everything:
 cursor-sync clone --all https://github.com/example/cursor-config.git
 
-# Use a non-default branch:
+# Use a non-default(master/main) branch:
 cursor-sync clone --branch dev https://github.com/example/cursor-config.git
 ```
 

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cwang0126/cursor-synchronizer/internal/banner"
 	"github.com/cwang0126/cursor-synchronizer/internal/config"
 	"github.com/cwang0126/cursor-synchronizer/internal/fsutil"
 	"github.com/cwang0126/cursor-synchronizer/internal/git"
@@ -29,8 +28,6 @@ func init() {
 }
 
 func runPull(cmd *cobra.Command, args []string) error {
-	banner.Print(os.Stdout)
-
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
