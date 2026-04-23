@@ -39,7 +39,10 @@ func SelectEntries(entries []fsutil.Entry) ([]fsutil.Entry, error) {
 		Options:  options,
 		PageSize: 15,
 	}
-	if err := survey.AskOne(q, &picked); err != nil {
+	restore := disableVTInput()
+	err := survey.AskOne(q, &picked)
+	restore()
+	if err != nil {
 		return nil, err
 	}
 
@@ -78,7 +81,10 @@ func ConfirmOverwrite(path string) (OverwriteDecision, error) {
 		Default: "N",
 		Help:    "y=yes  N=no (default)  a=yes to all  s=skip all",
 	}
-	if err := survey.AskOne(q, &ans); err != nil {
+	restore := disableVTInput()
+	err := survey.AskOne(q, &ans)
+	restore()
+	if err != nil {
 		return OverwriteNo, err
 	}
 	switch ans {
